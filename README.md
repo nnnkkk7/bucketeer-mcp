@@ -116,6 +116,7 @@ Parameters:
 - `tags` (optional) - Tags for the feature flag
 - `defaultOnVariationIndex` (required) - Index of variation when flag is on (0-based)
 - `defaultOffVariationIndex` (required) - Index of variation when flag is off (0-based)
+- `variationType` (optional) - Type of the variation values: STRING (default), BOOLEAN, NUMBER, or JSON
 
 #### getFeatureFlag
 
@@ -132,12 +133,17 @@ Update an existing feature flag.
 
 Parameters:
 - `id` (required) - The ID of the feature flag to update
+- `comment` (required) - Comment for the update (required for audit trail)
 - `environmentId` (optional) - Environment ID (uses default if not provided)
 - `name` (optional) - New name for the feature flag
 - `description` (optional) - New description
 - `tags` (optional) - New tags
 - `enabled` (optional) - Enable or disable the feature flag
 - `archived` (optional) - Archive or unarchive the feature flag
+
+Note: 
+- This tool requires a comment for audit trail purposes
+- It does not support updating variations. To modify variations, you would need to archive the current flag and create a new one.
 
 #### archiveFeatureFlag
 
@@ -146,7 +152,7 @@ Archive a feature flag (make it inactive). Archived flags will return the defaul
 Parameters:
 - `id` (required) - The ID of the feature flag to archive
 - `environmentId` (optional) - Environment ID (uses default if not provided)
-- `comment` (optional) - Optional comment for the archive action
+- `comment` (required) - Comment for the archive action (required for audit trail)
 
 Note: This operation archives the flag rather than permanently deleting it. The flag can be unarchived later if needed.
 
