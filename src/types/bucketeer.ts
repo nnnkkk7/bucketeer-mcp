@@ -1,5 +1,24 @@
 // Bucketeer API types
 
+export enum VariationType {
+  STRING = 'STRING',
+  BOOLEAN = 'BOOLEAN',
+  NUMBER = 'NUMBER',
+  JSON = 'JSON'
+}
+
+export enum ChangeType {
+  UNSPECIFIED = 'UNSPECIFIED',
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE'
+}
+
+// Common types
+export interface StringListValue {
+  values: string[];
+}
+
 export interface Variation {
   id: string;
   value: string;
@@ -23,6 +42,11 @@ export interface Rule {
   id: string;
   strategy: Strategy;
   clauses: Clause[];
+}
+
+export interface Prerequisite {
+  featureId: string;
+  variationId: string;
 }
 
 export interface Strategy {
@@ -89,6 +113,7 @@ export interface CreateFeatureRequest {
   defaultOnVariationIndex: number;
   defaultOffVariationIndex: number;
   environmentId: string;
+  variationType?: VariationType;
 }
 
 export interface GetFeatureRequest {
@@ -97,15 +122,46 @@ export interface GetFeatureRequest {
   featureVersion?: number;
 }
 
+// Change types for UpdateFeatureRequest
+export interface VariationChange {
+  changeType: ChangeType;
+  variation?: Variation;
+}
+
+export interface RuleChange {
+  changeType: ChangeType;
+  rule?: Rule;
+}
+
+export interface PrerequisiteChange {
+  changeType: ChangeType;
+  prerequisite?: Prerequisite;
+}
+
+export interface TargetChange {
+  changeType: ChangeType;
+  target?: Target;
+}
+
+export interface TagChange {
+  changeType: ChangeType;
+  tag?: string;
+}
+
 export interface UpdateFeatureRequest {
   id: string;
   environmentId: string;
+  comment: string;
   name?: string;
   description?: string;
-  tags?: string[];
+  tags?: StringListValue;
   enabled?: boolean;
   archived?: boolean;
-  // For simplicity, we're not including complex update operations like rule changes
+  variationChanges?: VariationChange[];
+  ruleChanges?: RuleChange[];
+  prerequisiteChanges?: PrerequisiteChange[];
+  targetChanges?: TargetChange[];
+  tagChanges?: TagChange[];
 }
 
 // Response types
