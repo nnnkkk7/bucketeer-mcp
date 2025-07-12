@@ -8,7 +8,7 @@ import type { UpdateFeatureRequest } from '../types/bucketeer.js';
 export const archiveFlagSchema = z.object({
   id: z.string().min(1, 'Feature flag ID is required'),
   environmentId: z.string().optional(),
-  comment: z.string().optional(),
+  comment: z.string().min(1, 'Comment is required for archiving'),
 });
 
 export type ArchiveFlagInput = z.infer<typeof archiveFlagSchema>;
@@ -29,10 +29,10 @@ export const archiveFlagTool = {
       },
       comment: {
         type: 'string',
-        description: 'Optional comment for the archive action',
+        description: 'Comment for the archive action (required for audit trail)',
       },
     },
-    required: ['id'],
+    required: ['id', 'comment'],
   },
   handler: async (input: unknown) => {
     try {
@@ -47,6 +47,7 @@ export const archiveFlagTool = {
       // Prepare request - use UpdateFeatureRequest with archived=true
       const request: UpdateFeatureRequest = {
         id: params.id,
+        comment: params.comment,
         environmentId: getEnvironmentId(params.environmentId),
         archived: true,
       };

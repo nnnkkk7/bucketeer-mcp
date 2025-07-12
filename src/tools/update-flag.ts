@@ -7,6 +7,7 @@ import type { UpdateFeatureRequest } from '../types/bucketeer.js';
 // Input schema for the update-flag tool
 export const updateFlagSchema = z.object({
   id: z.string().min(1, 'Feature flag ID is required'),
+  comment: z.string().min(1, 'Comment is required for all updates'),
   environmentId: z.string().optional(),
   name: z.string().optional(),
   description: z.string().optional(),
@@ -37,6 +38,10 @@ export const updateFlagTool = {
         type: 'string',
         description: 'The ID of the feature flag to update',
       },
+      comment: {
+        type: 'string',
+        description: 'Comment for the update (required for audit trail)',
+      },
       environmentId: {
         type: 'string',
         description: 'Environment ID (uses default if not provided)',
@@ -63,7 +68,7 @@ export const updateFlagTool = {
         description: 'Archive or unarchive the feature flag',
       },
     },
-    required: ['id'],
+    required: ['id', 'comment'],
   },
   handler: async (input: unknown) => {
     try {
@@ -71,6 +76,7 @@ export const updateFlagTool = {
       const params = updateFlagSchema.parse(input);
       
       logger.debug('Updating feature flag', params);
+      console.log('UPDATE PARAMS:', JSON.stringify(params, null, 2));
       
       // Create API client
       const client = new BucketeerClient(config.bucketeerHost, config.bucketeerApiKey);
@@ -78,10 +84,11 @@ export const updateFlagTool = {
       // Prepare request
       const request: UpdateFeatureRequest = {
         id: params.id,
+        comment: params.comment,
         environmentId: getEnvironmentId(params.environmentId),
         name: params.name,
         description: params.description,
-        tags: params.tags,
+        tags: params.tags ? { values: params.tags } : undefined,
         enabled: params.enabled,
         archived: params.archived,
       };

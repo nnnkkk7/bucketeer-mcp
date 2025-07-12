@@ -3,6 +3,7 @@ import { BucketeerClient } from '../api/client.js';
 import { config, getEnvironmentId } from '../config.js';
 import { logger } from '../utils/logger.js';
 import type { CreateFeatureRequest } from '../types/bucketeer.js';
+import { VariationType } from '../types/bucketeer.js';
 
 // Variation schema
 const variationSchema = z.object({
@@ -23,6 +24,7 @@ export const createFlagSchema = z.object({
   tags: z.array(z.string()).optional(),
   defaultOnVariationIndex: z.number().min(0),
   defaultOffVariationIndex: z.number().min(0),
+  variationType: z.nativeEnum(VariationType).optional().default(VariationType.STRING),
 });
 
 export type CreateFlagInput = z.infer<typeof createFlagSchema>;
@@ -84,6 +86,11 @@ export const createFlagTool = {
         type: 'number',
         description: 'Index of the variation to serve when flag is off (0-based)',
       },
+      variationType: {
+        type: 'string',
+        enum: ['STRING', 'BOOLEAN', 'NUMBER', 'JSON'],
+        description: 'Type of the variation values (default: STRING)',
+      },
     },
     required: ['id', 'name', 'variations', 'defaultOnVariationIndex', 'defaultOffVariationIndex'],
   },
@@ -115,6 +122,7 @@ export const createFlagTool = {
         tags: params.tags,
         defaultOnVariationIndex: params.defaultOnVariationIndex,
         defaultOffVariationIndex: params.defaultOffVariationIndex,
+        variationType: params.variationType,
       };
       
       // Make API call
