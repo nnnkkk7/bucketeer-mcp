@@ -81,17 +81,32 @@ export class BucketeerClient {
   }
 
   async createFeature(data: CreateFeatureRequest): Promise<CreateFeatureResponse> {
-    // Format the request body according to Bucketeer API spec
-    const requestBody = {
+    // Prepare variations - let the server generate IDs
+    const variationsForRequest = data.variations.map(v => ({
+      value: v.value,
+      name: v.name,
+      description: v.description || ''
+    }));
+
+    // Format the request body according to Bucketeer Gateway API spec
+    // Note: environmentId is NOT included in the request body for Gateway API
+    // The Gateway API automatically gets the environmentId from the API key
+    const requestBody: any = {
       id: data.id,
       name: data.name,
-      description: data.description,
-      variations: data.variations,
-      tags: data.tags || [],
-      defaultOnVariationIndex: data.defaultOnVariationIndex,
-      defaultOffVariationIndex: data.defaultOffVariationIndex,
-      environmentId: data.environmentId
+      variations: variationsForRequest,
+      onVariationIndex: data.defaultOnVariationIndex,
+      offVariationIndex: data.defaultOffVariationIndex,
+      variationType: data.variationType || 'STRING'
     };
+    
+    // Only include optional fields if they are provided
+    if (data.description !== undefined && data.description !== '') {
+      requestBody.description = data.description;
+    }
+    if (data.tags && data.tags.length > 0) {
+      requestBody.tags = data.tags;
+    }
 
     const response = await this.client.post<CreateFeatureResponse>('/v1/feature', requestBody);
     return response.data;
@@ -109,19 +124,41 @@ export class BucketeerClient {
   }
 
   async updateFeature(data: UpdateFeatureRequest): Promise<UpdateFeatureResponse> {
-    // For PATCH request, only include fields that are being updated
+    // For PATCH request, include all required fields and change arrays
     const patchData: any = {
       id: data.id,
-      environmentId: data.environmentId
+      environmentId: data.environmentId,
+      comment: data.comment, // Required for all updates
+      // Always include change arrays, even if empty
+      variationChanges: data.variationChanges || [],
+      ruleChanges: data.ruleChanges || [],
+      prerequisiteChanges: data.prerequisiteChanges || [],
+      targetChanges: data.targetChanges || [],
+      tagChanges: data.tagChanges || []
     };
 
-    if (data.name !== undefined) patchData.name = data.name;
-    if (data.description !== undefined) patchData.description = data.description;
-    if (data.tags !== undefined) patchData.tags = data.tags;
-    if (data.enabled !== undefined) patchData.enabled = data.enabled;
-    if (data.archived !== undefined) patchData.archived = data.archived;
-
-    const response = await this.client.patch<UpdateFeatureResponse>('/v1/feature', patchData);
-    return response.data;
+    // Use protobuf wrapper format for all optional fields as per Bucketeer API spec
+    if (data.name !== undefined) {
+      patchData.name = { value: data.name };
+    }
+    if (data.description !== undefined) {
+      patchData.description = { value: data.description };
+    }
+    if (data.enabled !== undefined) {
+      patchData.enabled = { value: data.enabled };
+    }
+    if (data.archived !== undefined) {
+      patchData.archived = { value: data.archived };
+    }
+    if (data.tags !== undefined) {
+      patchData.tags = data.tags; // Already in StringListValue format
+    }
+    try {
+      const response = await this.client.patch<UpdateFeatureResponse>('/v1/feature', patchData);
+      return response.data;
+    } catch (error) {
+      console.error('UPDATE FAILED:', error);
+      throw error;
+    }
   }
 }
