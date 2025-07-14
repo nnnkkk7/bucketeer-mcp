@@ -137,28 +137,24 @@ export class BucketeerClient {
       tagChanges: data.tagChanges || []
     };
 
-    // Use protobuf wrapper format for all optional fields as per Bucketeer API spec
+    // Gateway API expects plain values, not protobuf wrapper format
     if (data.name !== undefined) {
-      patchData.name = { value: data.name };
+      patchData.name = data.name;
     }
     if (data.description !== undefined) {
-      patchData.description = { value: data.description };
+      patchData.description = data.description;
     }
     if (data.enabled !== undefined) {
-      patchData.enabled = { value: data.enabled };
+      patchData.enabled = data.enabled;
     }
     if (data.archived !== undefined) {
-      patchData.archived = { value: data.archived };
+      patchData.archived = data.archived;
     }
     if (data.tags !== undefined) {
-      patchData.tags = data.tags; // Already in StringListValue format
+      patchData.tags = data.tags; // StringListValue format: { values: [...] }
     }
-    try {
-      const response = await this.client.patch<UpdateFeatureResponse>('/v1/feature', patchData);
-      return response.data;
-    } catch (error) {
-      console.error('UPDATE FAILED:', error);
-      throw error;
-    }
+    
+    const response = await this.client.patch<UpdateFeatureResponse>('/v1/feature', patchData);
+    return response.data;
   }
 }

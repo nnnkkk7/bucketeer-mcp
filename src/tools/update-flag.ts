@@ -76,7 +76,6 @@ export const updateFlagTool = {
       const params = updateFlagSchema.parse(input);
       
       logger.debug('Updating feature flag', params);
-      console.log('UPDATE PARAMS:', JSON.stringify(params, null, 2));
       
       // Create API client
       const client = new BucketeerClient(config.bucketeerHost, config.bucketeerApiKey);
@@ -86,12 +85,24 @@ export const updateFlagTool = {
         id: params.id,
         comment: params.comment,
         environmentId: getEnvironmentId(params.environmentId),
-        name: params.name,
-        description: params.description,
-        tags: params.tags ? { values: params.tags } : undefined,
-        enabled: params.enabled,
-        archived: params.archived,
       };
+      
+      // Only add fields that are being updated
+      if (params.name !== undefined) {
+        request.name = params.name;
+      }
+      if (params.description !== undefined) {
+        request.description = params.description;
+      }
+      if (params.tags !== undefined) {
+        request.tags = { values: params.tags };
+      }
+      if (params.enabled !== undefined) {
+        request.enabled = params.enabled;
+      }
+      if (params.archived !== undefined) {
+        request.archived = params.archived;
+      }
       
       // Make API call
       const response = await client.updateFeature(request);
