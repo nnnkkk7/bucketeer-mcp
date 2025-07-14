@@ -1,17 +1,9 @@
 // Bucketeer API types
-
 export enum VariationType {
   STRING = 'STRING',
   BOOLEAN = 'BOOLEAN',
   NUMBER = 'NUMBER',
   JSON = 'JSON'
-}
-
-export enum ChangeType {
-  UNSPECIFIED = 'UNSPECIFIED',
-  CREATE = 'CREATE',
-  UPDATE = 'UPDATE',
-  DELETE = 'DELETE'
 }
 
 // Common types
@@ -122,32 +114,6 @@ export interface GetFeatureRequest {
   featureVersion?: number;
 }
 
-// Change types for UpdateFeatureRequest
-export interface VariationChange {
-  changeType: ChangeType;
-  variation?: Variation;
-}
-
-export interface RuleChange {
-  changeType: ChangeType;
-  rule?: Rule;
-}
-
-export interface PrerequisiteChange {
-  changeType: ChangeType;
-  prerequisite?: Prerequisite;
-}
-
-export interface TargetChange {
-  changeType: ChangeType;
-  target?: Target;
-}
-
-export interface TagChange {
-  changeType: ChangeType;
-  tag?: string;
-}
-
 export interface UpdateFeatureRequest {
   id: string;
   environmentId: string;
@@ -157,11 +123,6 @@ export interface UpdateFeatureRequest {
   tags?: StringListValue;
   enabled?: boolean;
   archived?: boolean;
-  variationChanges?: VariationChange[];
-  ruleChanges?: RuleChange[];
-  prerequisiteChanges?: PrerequisiteChange[];
-  targetChanges?: TargetChange[];
-  tagChanges?: TagChange[];
 }
 
 // Response types

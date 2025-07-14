@@ -124,17 +124,11 @@ export class BucketeerClient {
   }
 
   async updateFeature(data: UpdateFeatureRequest): Promise<UpdateFeatureResponse> {
-    // For PATCH request, include all required fields and change arrays
+    // For PATCH request, include all required fields
     const patchData: any = {
       id: data.id,
       environmentId: data.environmentId,
-      comment: data.comment, // Required for all updates
-      // Always include change arrays, even if empty
-      variationChanges: data.variationChanges || [],
-      ruleChanges: data.ruleChanges || [],
-      prerequisiteChanges: data.prerequisiteChanges || [],
-      targetChanges: data.targetChanges || [],
-      tagChanges: data.tagChanges || []
+      comment: data.comment // Required for all updates
     };
 
     // Gateway API expects plain values, not protobuf wrapper format
